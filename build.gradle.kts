@@ -1,26 +1,6 @@
+// Root Gradle file intentionally kept minimal.
+// The Android app configuration lives in app/build.gradle.kts.
+
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-}
-
-android {
-    namespace = "com.aether.launcher"
-    compileSdk = 35
-
-    defaultConfig {
-        applicationId = "com.aether.launcher"
-        minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    // No root-level Android plugin declaration required here.
 }
