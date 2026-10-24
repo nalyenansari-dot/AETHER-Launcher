@@ -83,7 +83,7 @@ class MainActivity : Activity() {
             setHintTextColor(Color.rgb(105, 126, 116))
             setTextColor(Color.WHITE)
             textSize = 15f
-            singleLine = true
+            isSingleLine = true
             setPadding(dp(16), 0, dp(16), 0)
             background = roundedBackground(panelColor, 14, Color.rgb(43, 58, 51))
             setText(getPreferences(MODE_PRIVATE).getString(KEY_PLAYER_NAME, ""))
