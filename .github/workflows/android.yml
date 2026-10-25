@@ -39,10 +39,16 @@ jobs:
           ls -1 "$ANDROID_HOME"
           ls -1 "$ANDROID_HOME/platforms"
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          gradle-version: '8.7'
 
       - name: Build AETHER APK
         run: gradle --no-daemon --stacktrace :app:assembleDebug
