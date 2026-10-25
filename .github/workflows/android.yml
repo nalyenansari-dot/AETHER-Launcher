@@ -25,7 +25,18 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        shell: bash
+        run: |
+          set -e
+          yes | sdkmanager --licenses
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Verify Android SDK installation
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls -1 "$ANDROID_HOME"
+          ls -1 "$ANDROID_HOME/platforms"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -36,6 +47,7 @@ jobs:
         run: gradle --no-daemon --stacktrace :app:assembleDebug
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: AETHER-debug-apk
