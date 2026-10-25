@@ -672,4 +672,191 @@ class MainActivity : Activity() {
                         message(
                             "Download failed:\n${e.message ?: "Unknown error"}"
                         )
-               
+                    }
+
+                    downloading = false
+                }
+            }
+        }
+    }
+
+    private fun calculateSha1(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-1")
+
+        file.inputStream().buffered().use { input ->
+            val buffer = ByteArray(8192)
+            var count: Int
+
+            while (input.read(buffer).also { count = it } != -1) {
+                digest.update(buffer, 0, count)
+            }
+        }
+
+        return digest.digest().joinToString("") {
+            "%02x".format(it.toInt() and 0xff)
+        }
+    }
+
+    private fun showSettings() {
+        val input = EditText(this).apply {
+            setText(playerName)
+            hint = "Enter player name"
+            setSingleLine(true)
+            setTextColor(white)
+            setHintTextColor(muted)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Player Settings")
+            .setMessage("Choose your offline profile name.")
+            .setView(input)
+            .setNegativeButton("CANCEL", null)
+            .setPositiveButton("SAVE") { _, _ ->
+                val entered = input.text.toString().trim()
+
+                if (entered.isEmpty()) {
+                    message("Enter a player name.")
+                } else {
+                    playerName = entered.take(16)
+
+                    getSharedPreferences(
+                        "aether_settings",
+                        MODE_PRIVATE
+                    ).edit()
+                        .putString("player_name", playerName)
+                        .apply()
+
+                    buildLauncher()
+                }
+            }
+            .show()
+    }
+
+    private fun sidebarButton(
+        title: String,
+        action: () -> Unit
+    ): TextView {
+        return text(title, 12f, white, true).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(10), 0, dp(5), 0)
+            background = rounded(panel, 10)
+
+            layoutParams = LinearLayout.LayoutParams(
+                -1,
+                dp(45)
+            ).apply {
+                bottomMargin = dp(8)
+            }
+
+            setOnClickListener { action() }
+        }
+    }
+
+    private fun miniCard(
+        title: String,
+        description: String
+    ): LinearLayout {
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(12), dp(10), dp(12), dp(8))
+            background = rounded(panel, 13)
+
+            addView(text(title, 12f, green, true))
+
+            addGap(this, 7)
+
+            addView(text(description, 11f, muted, false))
+        }
+    }
+
+    private fun smallAction(
+        title: String,
+        action: () -> Unit
+    ): TextView {
+        return text(title, 11f, white, true).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(8), dp(4), dp(5), dp(4))
+            background = rounded(Color.rgb(25, 42, 32), 9)
+
+            layoutParams = LinearLayout.LayoutParams(
+                -1,
+                dp(34)
+            ).apply {
+                bottomMargin = dp(5)
+            }
+
+            setOnClickListener { action() }
+        }
+    }
+
+    private fun divider(): View {
+        return View(this).apply {
+            setBackgroundColor(Color.rgb(35, 65, 49))
+            layoutParams = LinearLayout.LayoutParams(
+                -1,
+                dp(1)
+            )
+        }
+    }
+
+    private fun text(
+        value: String,
+        size: Float,
+        color: Int,
+        bold: Boolean
+    ): TextView {
+        return TextView(this).apply {
+            text = value
+            textSize = size
+            setTextColor(color)
+
+            if (bold) {
+                typeface = Typeface.DEFAULT_BOLD
+            }
+        }
+    }
+
+    private fun addGap(parent: LinearLayout, height: Int) {
+        parent.addView(
+            View(this),
+            LinearLayout.LayoutParams(1, dp(height))
+        )
+    }
+
+    private fun rounded(color: Int, radius: Int): GradientDrawable {
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = dp(radius).toFloat()
+            setStroke(dp(1), Color.rgb(33, 72, 48))
+        }
+    }
+
+    private fun colorDrawable(
+        color: Int,
+        radius: Int
+    ): GradientDrawable {
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = dp(radius).toFloat()
+        }
+    }
+
+    private fun message(value: String) {
+        if (isFinishing) return
+
+        AlertDialog.Builder(this)
+            .setTitle("AETHER")
+            .setMessage(value)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Keep the executor alive if a download is still running.
+    }
+}
