@@ -15,7 +15,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import org.json.JSONObject
@@ -28,11 +27,11 @@ import java.util.concurrent.Executors
 
 class MainActivity : Activity() {
 
-    private val bg = Color.rgb(7, 11, 9)
-    private val panel = Color.rgb(17, 25, 21)
-    private val green = Color.rgb(0, 255, 145)
+    private val bg = Color.parseColor("#041d1b")
+    private val panel = Color.parseColor("#061f1f")
+    private val green = Color.parseColor("#4AFFA0")
     private val white = Color.WHITE
-    private val muted = Color.rgb(145, 165, 154)
+    private val muted = Color.parseColor("#91A59A")
 
     private val executor = Executors.newSingleThreadExecutor()
     private val handler = Handler(Looper.getMainLooper())
@@ -63,330 +62,304 @@ class MainActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             setBackgroundColor(bg)
         }
-
         setContentView(root)
-
-        // LEFT SIDEBAR
 
         val sidebar = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(12), dp(18), dp(12), dp(12))
             setBackgroundColor(panel)
+            setPadding(dp(14), dp(18), dp(14), dp(12))
+        }
+        root.addView(sidebar, LinearLayout.LayoutParams(dp(210), -1))
+
+        val brand = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 0, 0, dp(12))
         }
 
-        root.addView(
-            sidebar,
-            LinearLayout.LayoutParams(dp(155), -1)
+        val logoBox = TextView(this).apply {
+            text = "A"
+            textSize = 30f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(green)
+            gravity = Gravity.CENTER
+            background = roundedBg(green, 12)
+            layoutParams = LinearLayout.LayoutParams(dp(38), dp(38))
+        }
+        brand.addView(logoBox)
+        brand.addView(
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(12), 0, 0, 0)
+                addView(text("AETHER", 26f, green, true))
+                addView(text("Minecraft Launcher", 11f, muted, false))
+            },
+            LinearLayout.LayoutParams(0, -2, 1f)
         )
-
-        val logo = text("AETHER", 23f, green, true)
-        logo.gravity = Gravity.CENTER
-
-        sidebar.addView(logo, LinearLayout.LayoutParams(-1, dp(52)))
-
-        sidebar.addView(sidebarButton("⌂   HOME") {
-            buildLauncher()
-        })
-
-        sidebar.addView(sidebarButton("▤   VERSIONS") {
-            showVersions()
-        })
-
-        sidebar.addView(sidebarButton("⚙   SETTINGS") {
-            showSettings()
-        })
-
-        val sideSpacer = View(this)
-        sidebar.addView(
-            sideSpacer,
-            LinearLayout.LayoutParams(1, 0, 1f)
-        )
+        sidebar.addView(brand, LinearLayout.LayoutParams(-1, dp(70)))
 
         sidebar.addView(
-            text("JAVA EDITION", 10f, muted, true).apply {
-                gravity = Gravity.CENTER
-            }
+            View(this).apply { setBackgroundColor(Color.parseColor("#0d3432")) },
+            LinearLayout.LayoutParams(-1, dp(1))
         )
+        addGap(sidebar, 20)
 
-        sidebar.addView(
-            text("AETHER v1.0", 11f, green, true).apply {
-                gravity = Gravity.CENTER
-            }
-        )
+        sidebar.addView(sidebarButton("⌂   HOME") { buildLauncher() })
+        sidebar.addView(sidebarButton("▤   VERSIONS") { showVersions() })
+        sidebar.addView(sidebarButton("⚙   SETTINGS") { showSettings() })
 
-        // CENTER PANEL
+        val spac = View(this)
+        sidebar.addView(spac, LinearLayout.LayoutParams(1, 0, 1f))
+
+        sidebar.addView(text("JAVA EDITION", 10f, muted, true).apply {
+            gravity = Gravity.CENTER
+            setPadding(0, dp(8), 0, dp(4))
+        })
+        sidebar.addView(text("AETHER v1.0", 12f, green, true).apply {
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, dp(6))
+        })
 
         val center = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(15), dp(18), dp(12))
+            setPadding(dp(18), dp(18), dp(18), dp(14))
         }
-
-        root.addView(
-            center,
-            LinearLayout.LayoutParams(0, -1, 1f)
-        )
+        root.addView(center, LinearLayout.LayoutParams(0, -1, 1f))
 
         val topBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
+        topBar.addView(text("", 1f, white, false), LinearLayout.LayoutParams(0, 0, 1f))
 
-        topBar.addView(
-            text("GAME LAUNCHER", 15f, white, true),
-            LinearLayout.LayoutParams(0, dp(35), 1f)
-        )
-
-        topBar.addView(
-            text("● AETHER READY", 10f, green, true)
-        )
-
-        center.addView(topBar)
-
-        addGap(center, 10)
-
-        // HERO CARD
+        val status = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val dot = View(this).apply {
+            setBackgroundColor(green)
+            layoutParams = LinearLayout.LayoutParams(dp(8), dp(8)).apply { rightMargin = dp(8) }
+        }
+        status.addView(dot)
+        status.addView(text("AETHER READY", 10f, green, true))
+        topBar.addView(status)
+        center.addView(topBar, LinearLayout.LayoutParams(-1, dp(26)))
 
         val hero = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(22), dp(18), dp(22), dp(18))
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#0a2b2a"))
+                cornerRadius = dp(18).toFloat()
+                setStroke(dp(1), Color.parseColor("#1d5d50"))
+            }
+        }
+        center.addView(hero, LinearLayout.LayoutParams(-1, dp(280)))
+
+        val heroText = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(22), dp(14), dp(18), dp(14))
-            background = GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                intArrayOf(
-                    Color.rgb(14, 40, 28),
-                    Color.rgb(7, 15, 11),
-                    Color.rgb(16, 32, 23)
-                )
-            ).apply {
-                cornerRadius = dp(20).toFloat()
-                setStroke(dp(1), Color.rgb(28, 80, 52))
-            }
+            setPadding(0, 0, dp(16), 0)
         }
-
-        center.addView(
-            hero,
-            LinearLayout.LayoutParams(-1, 0, 1f)
-        )
-
-        hero.addView(text("AETHER LAUNCHER", 12f, green, true))
-
-        addGap(hero, 8)
-
-        hero.addView(text("YOUR WORLD.", 29f, white, true))
-        hero.addView(text("YOUR ADVENTURE.", 29f, green, true))
-
-        addGap(hero, 5)
-
-        hero.addView(
-            text(
-                "Explore. Build. Survive.\nMinecraft Java Edition.",
-                13f,
-                muted,
-                false
-            )
-        )
-
-        addGap(hero, 12)
+        heroText.addView(text("AETHER LAUNCHER", 13f, green, true))
+        addGap(heroText, 10)
+        heroText.addView(text("YOUR WORLD.", 36f, white, true))
+        heroText.addView(text("YOUR ADVENTURE.", 36f, green, true))
+        addGap(heroText, 10)
+        heroText.addView(text("Explore. Build. Survive.\nMinecraft Java Edition.", 14f, muted, false))
+        addGap(heroText, 16)
 
         val playButton = Button(this).apply {
-            text = "▶   PLAY MINECRAFT"
-            textSize = 15f
-            isAllCaps = false
+            text = "▶  PLAY"
+            textSize = 20f
             typeface = Typeface.DEFAULT_BOLD
+            isAllCaps = false
             setTextColor(Color.BLACK)
-            background = rounded(green, 12)
-
-            setOnClickListener {
-                showPlayInfo()
-            }
+            background = rounded(green, 14)
+            setOnClickListener { showPlayInfo() }
         }
-
-        hero.addView(
-            playButton,
-            LinearLayout.LayoutParams(dp(220), dp(49))
-        )
-
-        addGap(hero, 8)
+        heroText.addView(playButton, LinearLayout.LayoutParams(dp(220), dp(54)))
+        addGap(heroText, 12)
 
         val versionRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-
-        versionRow.addView(
-            text("Selected Version: ", 12f, muted, false)
-        )
-
+        versionRow.addView(text("Selected Version: ", 12f, muted, false))
         versionLabel = text(selectedVersion, 13f, green, true)
         versionLabel.setOnClickListener { showVersions() }
         versionRow.addView(versionLabel)
+        versionRow.addView(text("  ▼", 12f, green, true))
+        heroText.addView(versionRow)
 
-        val change = text("   ▼", 12f, green, true)
-        change.setOnClickListener { showVersions() }
-        versionRow.addView(change)
+        hero.addView(heroText, LinearLayout.LayoutParams(0, -1, 1f))
 
-        hero.addView(versionRow)
+        val scene = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                intArrayOf(
+                    Color.parseColor("#efc9ae"),
+                    Color.parseColor("#a5d7d7"),
+                    Color.parseColor("#143e38")
+                )
+            ).apply { cornerRadius = dp(18).toFloat() }
+        }
 
-        // BOTTOM CARDS
-
-        addGap(center, 10)
+        val sceneBanner = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.BOTTOM
+            setPadding(dp(12), 0, dp(12), dp(8))
+        }
+        val mcText = text("MINECRAFT\nJAVA EDITION", 18f, white, true)
+        mcText.gravity = Gravity.CENTER
+        mcText.setShadowLayer(8f, 0f, 0f, Color.argb(100, 0, 0, 0))
+        sceneBanner.addView(mcText)
+        scene.addView(sceneBanner, LinearLayout.LayoutParams(-1, -1))
+        hero.addView(scene, LinearLayout.LayoutParams(dp(260), -1))
 
         val bottomRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
         }
+        center.addView(bottomRow, LinearLayout.LayoutParams(-1, dp(150)))
 
-        center.addView(
-            bottomRow,
-            LinearLayout.LayoutParams(-1, dp(105))
-        )
-
-        val newsCard = miniCard(
-            "LATEST NEWS",
-            "Minecraft $selectedVersion\nSelect a version to download its client."
-        )
-
-        bottomRow.addView(
-            newsCard,
-            LinearLayout.LayoutParams(0, -1, 1f)
-        )
-
-        val spacer = View(this)
-        bottomRow.addView(
-            spacer,
-            LinearLayout.LayoutParams(dp(10), 1)
-        )
-
-        val actionsCard = LinearLayout(this).apply {
+        val news = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(12), dp(10), dp(12), dp(8))
-            background = rounded(panel, 13)
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+            background = rounded(panel, 15)
         }
+        val newsHeader = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        newsHeader.addView(text("📰", 14f, green, true))
+        newsHeader.addView(text(" Latest News", 16f, green, true))
+        val viewAll = text("View All →", 11f, muted, false)
+        viewAll.gravity = Gravity.END
+        newsHeader.addView(viewAll, LinearLayout.LayoutParams(0, -2, 1f))
+        news.addView(newsHeader)
 
-        bottomRow.addView(
-            actionsCard,
-            LinearLayout.LayoutParams(0, -1, 1f)
-        )
+        addGap(news, 10)
 
-        actionsCard.addView(
-            text("QUICK ACTIONS", 12f, green, true)
-        )
-
-        addGap(actionsCard, 5)
-
-        actionsCard.addView(
-            smallAction("⬇  Download Client") {
-                downloadClient()
+        val thumb = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.BOTTOM
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#190d2a"))
+                cornerRadius = dp(12).toFloat()
             }
-        )
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+        }
+        thumb.addView(text("Minecraft 1.21.4", 14f, white, true))
+        thumb.addView(text("The latest release brings new features, fixes and improvements to your world.", 12f, muted, false))
+        thumb.addView(text("Apr 05, 2025", 10f, green, true))
+        news.addView(thumb, LinearLayout.LayoutParams(-1, 0, 1f))
 
-        actionsCard.addView(
-            smallAction("▤  View Versions") {
-                showVersions()
-            }
-        )
+        bottomRow.addView(news, LinearLayout.LayoutParams(0, -1, 1f).apply { rightMargin = dp(12) })
 
-        // RIGHT PROFILE PANEL
+        val actions = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(12), dp(12), dp(12), dp(12))
+            background = rounded(panel, 15)
+        }
+        val actionHeader = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        actionHeader.addView(text("⚡", 15f, green, true))
+        actionHeader.addView(text(" Quick Actions", 16f, green, true))
+        actions.addView(actionHeader)
+
+        addGap(actions, 10)
+        actions.addView(smallAction("⬇  Download Client") { downloadClient() })
+        actions.addView(smallAction("▤  View All Versions") { showVersions() })
+        bottomRow.addView(actions, LinearLayout.LayoutParams(0, -1, 1f))
 
         val profile = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(15), dp(22), dp(15), dp(14))
+            setPadding(dp(18), dp(18), dp(18), dp(18))
             setBackgroundColor(panel)
         }
+        root.addView(profile, LinearLayout.LayoutParams(dp(220), -1))
 
-        root.addView(
-            profile,
-            LinearLayout.LayoutParams(dp(180), -1)
-        )
+        profile.addView(text("PLAYER PROFILE", 12f, green, true).apply { gravity = Gravity.CENTER })
+        addGap(profile, 14)
 
-        profile.addView(
-            text("PLAYER PROFILE", 12f, green, true)
-        )
-
-        addGap(profile, 15)
-
-        avatar = text(
-            playerName.take(1).uppercase(),
-            34f,
-            green,
-            true
-        ).apply {
+        avatar = text(playerName.take(1).uppercase(), 34f, green, true).apply {
             gravity = Gravity.CENTER
-            background = rounded(Color.rgb(29, 52, 40), 45)
+            background = roundedBg(green, 45)
+            layoutParams = LinearLayout.LayoutParams(dp(86), dp(86))
         }
-
-        profile.addView(
-            avatar,
-            LinearLayout.LayoutParams(dp(68), dp(68))
-        )
-
+        val avatarWrap = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        avatarWrap.addView(avatar)
+        profile.addView(avatarWrap)
         addGap(profile, 8)
 
-        nameLabel = text(playerName, 18f, white, true)
+        nameLabel = text(playerName, 19f, white, true)
         profile.addView(nameLabel)
-
-        addGap(profile, 3)
+        addGap(profile, 4)
 
         profile.addView(
-            text("● Offline Profile", 11f, muted, false)
+            LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                val dot = View(this).apply {
+                    setBackgroundColor(green)
+                    layoutParams = LinearLayout.LayoutParams(dp(9), dp(9)).apply { rightMargin = dp(8) }
+                }
+                addView(dot)
+                addView(text("Offline Profile", 11f, muted, false))
+            }
         )
 
+        addGap(profile, 18)
+        profile.addView(smallAction("✎  Edit Name") { showSettings() })
+
+        addGap(profile, 16)
+        profile.addView(divider())
+        addGap(profile, 16)
+
+        profile.addView(text("SELECTED VERSION", 10f, muted, true).apply { gravity = Gravity.CENTER })
+        addGap(profile, 6)
+        profile.addView(text(selectedVersion, 30f, green, true).apply { gravity = Gravity.CENTER })
+        profile.addView(text("Latest Release", 11f, muted, false).apply { gravity = Gravity.CENTER })
+
+        addGap(profile, 18)
+        profile.addView(smallAction("⇄  Change Version") { showVersions() })
+
+        addGap(profile, 18)
+        profile.addView(divider())
+        addGap(profile, 18)
+
+        profile.addView(text("QUICK STATS", 10f, muted, true).apply { gravity = Gravity.CENTER })
         addGap(profile, 10)
 
-        profile.addView(
-            smallAction("Edit Player Name") {
-                showSettings()
-            }
-        )
-
-        addGap(profile, 12)
-        profile.addView(divider())
-        addGap(profile, 12)
-
-        profile.addView(
-            text("SELECTED VERSION", 10f, muted, true)
-        )
-
-        addGap(profile, 6)
-
-        val profileVersion = text(selectedVersion, 20f, green, true)
-        profile.addView(profileVersion)
+        val stat1 = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        stat1.addView(text("▣", 18f, green, true))
+        stat1.addView(text(" Java Edition", 12f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
+        profile.addView(stat1)
 
         addGap(profile, 8)
 
-        profile.addView(
-            smallAction("Change Version") {
-                showVersions()
-            }
-        )
-
-        addGap(profile, 12)
-        profile.addView(divider())
-        addGap(profile, 12)
-
-        profile.addView(
-            text("LAUNCHER INFO", 10f, green, true)
-        )
-
-        addGap(profile, 7)
-
-        profile.addView(
-            text("AETHER v1.0", 12f, white, true)
-        )
-
-        profile.addView(
-            text("Minecraft Java Edition", 10f, muted, false)
-        )
+        val stat2 = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        stat2.addView(text("◉", 18f, green, true))
+        stat2.addView(text(" AETHER v1.0", 12f, white, true), LinearLayout.LayoutParams(0, -2, 1f))
+        profile.addView(stat2)
 
         val profileSpacer = View(this)
-
-        profile.addView(
-            profileSpacer,
-            LinearLayout.LayoutParams(1, 0, 1f)
-        )
-
-        profile.addView(
-            text("BUILT FOR EXPLORERS", 9f, green, true)
-        )
+        profile.addView(profileSpacer, LinearLayout.LayoutParams(1, 0, 1f))
+        profile.addView(text("Built for real explorers.", 10f, muted, false).apply { gravity = Gravity.CENTER })
     }
 
     private fun showPlayInfo() {
@@ -400,41 +373,26 @@ class MainActivity : Activity() {
                 "A complete game installation, Java runtime, " +
                 "libraries, assets and launch engine are still required."
             )
-            .setPositiveButton("DOWNLOAD CLIENT") { _, _ ->
-                downloadClient()
-            }
+            .setPositiveButton("DOWNLOAD CLIENT") { _, _ -> downloadClient() }
             .setNegativeButton("CLOSE", null)
             .show()
     }
 
     private fun showVersions() {
-        Toast.makeText(
-            this,
-            "Loading Minecraft versions...",
-            Toast.LENGTH_SHORT
-        ).show()
-
+        Toast.makeText(this, "Loading Minecraft versions...", Toast.LENGTH_SHORT).show()
         executor.execute {
             try {
-                val connection = URL(
-                    "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-                ).openConnection() as HttpURLConnection
-
+                val connection = URL("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").openConnection() as HttpURLConnection
                 connection.connectTimeout = 15000
                 connection.readTimeout = 15000
 
-                val data = connection.inputStream.bufferedReader().use {
-                    it.readText()
-                }
-
+                val data = connection.inputStream.bufferedReader().use { it.readText() }
                 connection.disconnect()
 
                 val array = JSONObject(data).getJSONArray("versions")
                 val releases = mutableListOf<String>()
-
                 for (i in 0 until array.length()) {
                     val item = array.getJSONObject(i)
-
                     if (item.optString("type") == "release") {
                         releases.add(item.getString("id"))
                     }
@@ -442,37 +400,22 @@ class MainActivity : Activity() {
 
                 handler.post {
                     if (isFinishing) return@post
-
                     val choices = releases.take(100).toTypedArray()
-
                     AlertDialog.Builder(this)
                         .setTitle("Select Minecraft Version")
                         .setItems(choices) { _, index ->
                             selectedVersion = choices[index]
-
-                            getSharedPreferences(
-                                "aether_settings",
-                                MODE_PRIVATE
-                            ).edit()
-                                .putString("selected_version", selectedVersion)
-                                .apply()
-
+                            getSharedPreferences("aether_settings", MODE_PRIVATE)
+                                .edit().putString("selected_version", selectedVersion).apply()
                             buildLauncher()
-
-                            Toast.makeText(
-                                this,
-                                "Selected $selectedVersion",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(this, "Selected $selectedVersion", Toast.LENGTH_SHORT).show()
                         }
                         .setNegativeButton("CANCEL", null)
                         .show()
                 }
             } catch (e: Exception) {
                 handler.post {
-                    if (!isFinishing) {
-                        message("Unable to load versions. Check your internet.")
-                    }
+                    if (!isFinishing) message("Unable to load versions. Check your internet.")
                 }
             }
         }
@@ -486,20 +429,14 @@ class MainActivity : Activity() {
 
         AlertDialog.Builder(this)
             .setTitle("Download Minecraft $selectedVersion?")
-            .setMessage(
-                "Download the official Minecraft client JAR " +
-                "into AETHER's private storage?"
-            )
+            .setMessage("Download the official Minecraft client JAR into AETHER's private storage?")
             .setNegativeButton("CANCEL", null)
-            .setPositiveButton("DOWNLOAD") { _, _ ->
-                beginDownload(selectedVersion)
-            }
+            .setPositiveButton("DOWNLOAD") { _, _ -> beginDownload(selectedVersion) }
             .show()
     }
 
     private fun beginDownload(version: String) {
         if (downloading) return
-
         downloading = true
 
         val dialog = ProgressDialog(this).apply {
@@ -514,65 +451,37 @@ class MainActivity : Activity() {
 
         executor.execute {
             var temporary: File? = null
-
             try {
-                val manifestConnection = URL(
-                    "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-                ).openConnection() as HttpURLConnection
-
+                val manifestConnection = URL("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json").openConnection() as HttpURLConnection
                 manifestConnection.connectTimeout = 15000
                 manifestConnection.readTimeout = 15000
-
-                val manifestText =
-                    manifestConnection.inputStream.bufferedReader().use {
-                        it.readText()
-                    }
-
+                val manifestText = manifestConnection.inputStream.bufferedReader().use { it.readText() }
                 manifestConnection.disconnect()
 
                 val manifest = JSONObject(manifestText)
                 val versions = manifest.getJSONArray("versions")
                 var versionUrl: String? = null
-
                 for (i in 0 until versions.length()) {
                     val item = versions.getJSONObject(i)
-
                     if (item.getString("id") == version) {
                         versionUrl = item.getString("url")
                         break
                     }
                 }
+                if (versionUrl == null) throw Exception("Minecraft version not found.")
 
-                if (versionUrl == null) {
-                    throw Exception("Minecraft version not found.")
-                }
-
-                val detailsConnection = URL(versionUrl)
-                    .openConnection() as HttpURLConnection
-
+                val detailsConnection = URL(versionUrl).openConnection() as HttpURLConnection
                 detailsConnection.connectTimeout = 15000
                 detailsConnection.readTimeout = 15000
-
-                val detailsText =
-                    detailsConnection.inputStream.bufferedReader().use {
-                        it.readText()
-                    }
-
+                val detailsText = detailsConnection.inputStream.bufferedReader().use { it.readText() }
                 detailsConnection.disconnect()
 
                 val details = JSONObject(detailsText)
-                val client = details
-                    .getJSONObject("downloads")
-                    .getJSONObject("client")
-
+                val client = details.getJSONObject("downloads").getJSONObject("client")
                 val downloadUrl = client.getString("url")
                 val expectedSha1 = client.optString("sha1", "")
 
-                val directory = File(
-                    filesDir,
-                    "minecraft/versions/$version"
-                )
-
+                val directory = File(filesDir, "minecraft/versions/$version")
                 if (!directory.exists() && !directory.mkdirs()) {
                     throw Exception("Could not create download folder.")
                 }
@@ -580,48 +489,33 @@ class MainActivity : Activity() {
                 val destination = File(directory, "$version.jar")
                 temporary = File(directory, "$version.jar.part")
 
-                val connection = URL(downloadUrl)
-                    .openConnection() as HttpURLConnection
-
+                val connection = URL(downloadUrl).openConnection() as HttpURLConnection
                 connection.connectTimeout = 20000
                 connection.readTimeout = 30000
                 connection.connect()
 
                 val total = connection.contentLengthLong
                 var downloaded = 0L
-
                 connection.inputStream.use { input ->
                     FileOutputStream(temporary).use { output ->
                         val buffer = ByteArray(8192)
                         var count: Int
-
-                        while (
-                            input.read(buffer).also { count = it } != -1
-                        ) {
+                        while (input.read(buffer).also { count = it } != -1) {
                             output.write(buffer, 0, count)
                             downloaded += count
-
                             if (total > 0) {
-                                val percent =
-                                    (downloaded * 100 / total)
-                                        .toInt()
-                                        .coerceIn(0, 100)
-
+                                val percent = (downloaded * 100 / total).toInt().coerceIn(0, 100)
                                 handler.post {
                                     if (!isFinishing) {
                                         dialog.progress = percent
-                                        dialog.setMessage(
-                                            "Downloading $version..."
-                                        )
+                                        dialog.setMessage("Downloading $version...")
                                     }
                                 }
                             }
                         }
-
                         output.flush()
                     }
                 }
-
                 connection.disconnect()
 
                 if (!temporary.exists() || temporary.length() == 0L) {
@@ -629,12 +523,8 @@ class MainActivity : Activity() {
                 }
 
                 if (expectedSha1.isNotBlank()) {
-                    handler.post {
-                        dialog.setMessage("Verifying download...")
-                    }
-
+                    handler.post { dialog.setMessage("Verifying download...") }
                     val actualSha1 = calculateSha1(temporary)
-
                     if (!actualSha1.equals(expectedSha1, true)) {
                         throw Exception("SHA-1 verification failed.")
                     }
@@ -643,7 +533,6 @@ class MainActivity : Activity() {
                 if (destination.exists() && !destination.delete()) {
                     throw Exception("Could not replace old client file.")
                 }
-
                 if (!temporary.renameTo(destination)) {
                     temporary.copyTo(destination, overwrite = true)
                     temporary.delete()
@@ -652,28 +541,21 @@ class MainActivity : Activity() {
                 handler.post {
                     if (!isFinishing) {
                         dialog.dismiss()
-
                         message(
                             "Minecraft $version client downloaded successfully!\n\n" +
                             "Saved in AETHER private storage.\n\n" +
                             "This is only the client JAR, not a complete playable installation."
                         )
                     }
-
                     downloading = false
                 }
-
             } catch (e: Exception) {
                 temporary?.delete()
-
                 handler.post {
                     if (!isFinishing) {
                         dialog.dismiss()
-                        message(
-                            "Download failed:\n${e.message ?: "Unknown error"}"
-                        )
+                        message("Download failed:\n${e.message ?: "Unknown error"}")
                     }
-
                     downloading = false
                 }
             }
@@ -682,19 +564,14 @@ class MainActivity : Activity() {
 
     private fun calculateSha1(file: File): String {
         val digest = MessageDigest.getInstance("SHA-1")
-
         file.inputStream().buffered().use { input ->
             val buffer = ByteArray(8192)
             var count: Int
-
             while (input.read(buffer).also { count = it } != -1) {
                 digest.update(buffer, 0, count)
             }
         }
-
-        return digest.digest().joinToString("") {
-            "%02x".format(it.toInt() and 0xff)
-        }
+        return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 
     private fun showSettings() {
@@ -713,128 +590,67 @@ class MainActivity : Activity() {
             .setNegativeButton("CANCEL", null)
             .setPositiveButton("SAVE") { _, _ ->
                 val entered = input.text.toString().trim()
-
                 if (entered.isEmpty()) {
                     message("Enter a player name.")
                 } else {
                     playerName = entered.take(16)
-
-                    getSharedPreferences(
-                        "aether_settings",
-                        MODE_PRIVATE
-                    ).edit()
-                        .putString("player_name", playerName)
-                        .apply()
-
+                    getSharedPreferences("aether_settings", MODE_PRIVATE)
+                        .edit().putString("player_name", playerName).apply()
                     buildLauncher()
                 }
             }
             .show()
     }
 
-    private fun sidebarButton(
-        title: String,
-        action: () -> Unit
-    ): TextView {
-        return text(title, 12f, white, true).apply {
+    private fun sidebarButton(title: String, action: () -> Unit): TextView {
+        return text(title, 20f, white, true).apply {
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(10), 0, dp(5), 0)
-            background = rounded(panel, 10)
-
-            layoutParams = LinearLayout.LayoutParams(
-                -1,
-                dp(45)
-            ).apply {
-                bottomMargin = dp(8)
-            }
-
+            setPadding(dp(12), 0, dp(8), 0)
+            background = rounded(Color.parseColor("#0b2d2c"), 12)
+            layoutParams = LinearLayout.LayoutParams(-1, dp(58)).apply { bottomMargin = dp(12) }
             setOnClickListener { action() }
         }
     }
 
-    private fun miniCard(
-        title: String,
-        description: String
-    ): LinearLayout {
-        return LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(12), dp(10), dp(12), dp(8))
-            background = rounded(panel, 13)
-
-            addView(text(title, 12f, green, true))
-
-            addGap(this, 7)
-
-            addView(text(description, 11f, muted, false))
-        }
-    }
-
-    private fun smallAction(
-        title: String,
-        action: () -> Unit
-    ): TextView {
-        return text(title, 11f, white, true).apply {
+    private fun smallAction(title: String, action: () -> Unit): TextView {
+        return text(title, 15f, white, true).apply {
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(8), dp(4), dp(5), dp(4))
-            background = rounded(Color.rgb(25, 42, 32), 9)
-
-            layoutParams = LinearLayout.LayoutParams(
-                -1,
-                dp(34)
-            ).apply {
-                bottomMargin = dp(5)
-            }
-
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+            background = rounded(Color.parseColor("#102f2c"), 12)
+            layoutParams = LinearLayout.LayoutParams(-1, dp(44)).apply { bottomMargin = dp(8) }
             setOnClickListener { action() }
         }
     }
 
     private fun divider(): View {
         return View(this).apply {
-            setBackgroundColor(Color.rgb(35, 65, 49))
-            layoutParams = LinearLayout.LayoutParams(
-                -1,
-                dp(1)
-            )
+            setBackgroundColor(Color.parseColor("#19493e"))
+            layoutParams = LinearLayout.LayoutParams(-1, dp(1))
         }
     }
 
-    private fun text(
-        value: String,
-        size: Float,
-        color: Int,
-        bold: Boolean
-    ): TextView {
+    private fun text(value: String, size: Float, color: Int, bold: Boolean): TextView {
         return TextView(this).apply {
             text = value
             textSize = size
             setTextColor(color)
-
-            if (bold) {
-                typeface = Typeface.DEFAULT_BOLD
-            }
+            if (bold) typeface = Typeface.DEFAULT_BOLD
         }
     }
 
     private fun addGap(parent: LinearLayout, height: Int) {
-        parent.addView(
-            View(this),
-            LinearLayout.LayoutParams(1, dp(height))
-        )
+        parent.addView(View(this), LinearLayout.LayoutParams(1, dp(height)))
     }
 
     private fun rounded(color: Int, radius: Int): GradientDrawable {
         return GradientDrawable().apply {
             setColor(color)
             cornerRadius = dp(radius).toFloat()
-            setStroke(dp(1), Color.rgb(33, 72, 48))
+            setStroke(dp(1), Color.parseColor("#224f46"))
         }
     }
 
-    private fun colorDrawable(
-        color: Int,
-        radius: Int
-    ): GradientDrawable {
+    private fun roundedBg(color: Int, radius: Int): GradientDrawable {
         return GradientDrawable().apply {
             setColor(color)
             cornerRadius = dp(radius).toFloat()
@@ -843,7 +659,6 @@ class MainActivity : Activity() {
 
     private fun message(value: String) {
         if (isFinishing) return
-
         AlertDialog.Builder(this)
             .setTitle("AETHER")
             .setMessage(value)
@@ -857,6 +672,5 @@ class MainActivity : Activity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Keep the executor alive if a download is still running.
     }
 }
