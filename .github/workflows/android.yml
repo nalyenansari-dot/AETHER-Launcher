@@ -11,6 +11,7 @@ jobs:
   build:
     name: Build Android APK
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -28,7 +29,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          yes | sdkmanager --licenses
+          sdkmanager --licenses </dev/null
           sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Verify Android SDK installation
