@@ -1,20 +1,19 @@
-name: Build AETHER APK
+name: Build AETHER Engine APK
 
 on:
-  push:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/android.yml'
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  build-engine:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -27,16 +26,20 @@ jobs:
       - name: Install SDK
         run: sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
+      - name: Fix public submodule URLs
+        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+      - name: Download Amethyst Engine
+        run: git clone --recursive --branch v3_openjdk https://github.com/AngelAuraMC/Amethyst-Android.git amethyst-engine
 
       - name: Build APK
-        run: gradle --no-daemon :app:assembleDebug
+        working-directory: amethyst-engine
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app_pojavlauncher:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AETHER-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: AETHER-engine-debug-apk
+          path: amethyst-engine/app_pojavlauncher/build/outputs/apk/debug/*.apk
