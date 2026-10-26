@@ -2,9 +2,6 @@ name: Build AETHER Launcher
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/android.yml'
 
 permissions:
   contents: read
@@ -14,42 +11,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup Java
+      - name: Checkout AETHER repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 11
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '11'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Install SDK
+      - name: Install Android SDK
         run: |
-          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
-      - name: Fix submodule URLs
-        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
-
-      - name: Download Engine
-        run: git clone --recursive --branch v3_openjdk https://github.com/AngelAuraMC/Amethyst-Android.git engine
-
-      - name: Apply AETHER Branding
-        working-directory: engine
+      - name: Download Zalith Launcher 2
         run: |
-          sed -i "s/resValue 'string', 'app_name', 'Amethyst (Debug)'/resValue 'string', 'app_name', 'AETHER Launcher'/g" app_pojavlauncher/build.gradle
-          sed -i 's/resValue "string", "app_name", "Amethyst (Debug)"/resValue "string", "app_name", "AETHER Launcher"/g' app_pojavlauncher/build.gradle
-          sed -i 's/resValue "string", "app_name", "Amethyst"/resValue "string", "app_name", "AETHER Launcher"/g' app_pojavlauncher/build.gradle
-          sed -i 's/#181818/#041d1b/g; s/#242424/#061f1f/g; s/#232323/#061f1f/g; s/#464646/#123b35/g' app_pojavlauncher/src/main/res/values/colors.xml
+          git clone --depth 1 \
+            https://github.com/ZalithLauncher/ZalithLauncher2.git \
+            zalith
+
+      - name: Set AETHER app name
+        working-directory: zalith
+        run: |
+          grep -n -i "app.*name\|name.*app" gradle.properties || true
+          echo "Source downloaded. Check gradle.properties before changing branding."
 
       - name: Build APK
-        working-directory: engine
+        working-directory: zalith
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon :app_pojavlauncher:assembleDebug
+          ./gradlew --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AETHER-Launcher-APK
-          path: engine/app_pojavlauncher/build/outputs/apk/debug/*.apk
+          name: AETHER-test-APK
+          path: zalith/**/build/outputs/apk/debug/*.apk
           if-no-files-found: error
