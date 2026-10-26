@@ -11,14 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout AETHER repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java 11
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '17'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
@@ -30,17 +27,13 @@ jobs:
             "platforms;android-35" \
             "build-tools;35.0.0"
 
+      - name: Fix Git submodule URLs
+        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
       - name: Download Zalith Launcher 2
         run: |
-          git clone --depth 1 \
-            https://github.com/ZalithLauncher/ZalithLauncher2.git \
-            zalith
-
-      - name: Set AETHER app name
-        working-directory: zalith
-        run: |
-          grep -n -i "app.*name\|name.*app" gradle.properties || true
-          echo "Source downloaded. Check gradle.properties before changing branding."
+          git clone --recursive \
+            https://github.com/ZalithLauncher/ZalithLauncher2.git zalith
 
       - name: Build APK
         working-directory: zalith
