@@ -1,4 +1,4 @@
-name: Build AETHER Engine APK
+name: Build AETHER Launcher
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build-engine:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,16 +24,24 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Install SDK
-        run: sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+        run: sdkmanager --install "platform-tools" "platforms;android-37" "build-tools;35.0.0"
 
-      - name: Fix public submodule URLs
+      - name: Fix submodule URLs
         run: git config --global url."https://github.com/".insteadOf "git@github.com:"
 
-      - name: Download Amethyst Engine
-        run: git clone --recursive --branch v3_openjdk https://github.com/AngelAuraMC/Amethyst-Android.git amethyst-engine
+      - name: Download Engine
+        run: git clone --recursive --branch v3_openjdk https://github.com/AngelAuraMC/Amethyst-Android.git engine
+
+      - name: Apply AETHER Branding
+        working-directory: engine
+        run: |
+          sed -i "s/resValue 'string', 'app_name', 'Amethyst (Debug)'/resValue 'string', 'app_name', 'AETHER Launcher'/g" app_pojavlauncher/build.gradle
+          sed -i 's/resValue "string", "app_name", "Amethyst (Debug)"/resValue "string", "app_name", "AETHER Launcher"/g' app_pojavlauncher/build.gradle
+          sed -i 's/resValue "string", "app_name", "Amethyst"/resValue "string", "app_name", "AETHER Launcher"/g' app_pojavlauncher/build.gradle
+          sed -i 's/#181818/#041d1b/g; s/#242424/#061f1f/g; s/#232323/#061f1f/g; s/#464646/#123b35/g' app_pojavlauncher/src/main/res/values/colors.xml
 
       - name: Build APK
-        working-directory: amethyst-engine
+        working-directory: engine
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon :app_pojavlauncher:assembleDebug
@@ -41,5 +49,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AETHER-engine-debug-apk
-          path: amethyst-engine/app_pojavlauncher/build/outputs/apk/debug/*.apk
+          name: AETHER-Launcher-APK
+          path: engine/app_pojavlauncher/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
