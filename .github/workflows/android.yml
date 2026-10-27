@@ -46,6 +46,20 @@ jobs:
           git clone --recursive \
             https://github.com/ZalithLauncher/ZalithLauncher2.git zalith
 
+      - name: Locate UI, Skin and Cape Files
+        working-directory: zalith
+        run: |
+          echo "=== UI and theme files ==="
+          find . -type f -name "*.kt" \
+            -not -path "*/build/*" \
+            | grep -Ei 'home|main|theme|color|skin|cape|account' \
+            | head -100 || true
+
+          echo "=== App name resources ==="
+          grep -Rni "app_name" . \
+            --include="*.xml" --include="*.kt" --include="*.kts" \
+            --exclude-dir=build | head -60 || true
+
       - name: Build APK
         working-directory: zalith
         run: |
