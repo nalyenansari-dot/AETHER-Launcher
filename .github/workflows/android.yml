@@ -46,19 +46,28 @@ jobs:
           git clone --recursive \
             https://github.com/ZalithLauncher/ZalithLauncher2.git zalith
 
-      - name: Locate UI, Skin and Cape Files
+      - name: Find Branding and UI Resources
         working-directory: zalith
         run: |
-          echo "=== UI and theme files ==="
-          find . -type f -name "*.kt" \
-            -not -path "*/build/*" \
-            | grep -Ei 'home|main|theme|color|skin|cape|account' \
-            | head -100 || true
+          echo "=== Project modules ==="
+          find . -maxdepth 3 \
+            \( -name "build.gradle" -o -name "build.gradle.kts" -o -name "settings.gradle.kts" \) \
+            -not -path "*/build/*" | head -80
 
-          echo "=== App name resources ==="
+          echo "=== App name ==="
           grep -Rni "app_name" . \
-            --include="*.xml" --include="*.kt" --include="*.kts" \
-            --exclude-dir=build | head -60 || true
+            --include="strings.xml" \
+            --exclude-dir=build | head -50 || true
+
+          echo "=== Compose screens ==="
+          grep -Rnl "@Composable" . \
+            --include="*.kt" \
+            --exclude-dir=build | head -80 || true
+
+          echo "=== Skin and cape support ==="
+          grep -RniE "skin|cape" . \
+            --include="*.kt" \
+            --exclude-dir=build | head -80 || true
 
       - name: Build APK
         working-directory: zalith
