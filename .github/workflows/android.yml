@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -26,9 +29,12 @@ jobs:
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Fix Git submodule URLs
-        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
 
       - name: Download Zalith Launcher 2
         run: |
